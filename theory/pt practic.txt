@@ -1,0 +1,361 @@
+Lab 5      -> statistics part
+
+Statistical measures
+
+Variances:
+
+
+when we know the entire population:
+sigma ^ 2 = 1/n SUM( i de la 1 la n) (xi - x(barat))^2
+
+
+the sample of the population:
+s ^ 2 = 1/(n-1) SUM( i de la 1 la n) (xi - x(barat))^2
+
+in matlab:
+sigma^2 = var(x,1)
+s^2 = var(x)
+
+
+Standard deviation:
+
+the entire pop:
+sigma = std(x,1)
+
+a sample:
+s = std(x)
+
+
+
+Confidence intervals:     //important la examen
+
+//posteaza pe teams ceva formule
+
+x = a characteristic of a population
+
+if we want to find its pdf:
+
+f(x, theta)
+
+theta=unknown parameter
+     ="target parameter"
+how to find it:
+
+a sample of size n:
+x1x2.....xn   (identical distributed variables=> the same pdf)
+Point estimate:
+theta(barat) = theta(barat)(x1....xn)
+Interval estimate: theta lower(barat), theta upper(barat) = ? st
+P(theta e (theta lower(barat), theta upper(barat)) = 1 - alpha
+
+theta lower(barat), theta upper(barat) = confidence level of 100(1-alpha)%
+alpha=significance level
+
+
+
+
+
+
+clear all;
+clc;
+
+X = [7, 7, 4, 5, 9, 9;
+     4, 12, 8, 1, 8, 7;
+     3, 13, 2, 1, 17, 1;
+     12, 5, 6, 2, 1, 13;
+     14, 10, 2, 4, 9, 11;
+     3, 5, 12, 6, 10, 7];
+n = numel(X);  % the nr of elems in X
+sigma = 5;
+confidence_level = input("Enter the confidence level: ");  % 1 - alpha
+alpha = 1 - confidence_level;
+matrix_mean = mean(X);
+theta_lower = matrix_mean - sigma / sqrt(n) * norminv(1 - alpha / 2, 0, 1)
+theta_upper = matrix_mean - sigma / sqrt(n) * norminv(alpha / 2, 0, 1)
+for i = 1:length(theta_lower)
+    fprintf("The confidence interval for confidence level %f%% is: (%f, %f)\n", ...
+            100 * (1 - alpha), theta_lower(i), theta_upper(i));
+end
+
+
+
+
+---------------------------------------------------------------------
+---------------------------------------------------------------------
+Lab 6
+Hypothesis testing
+
+Review: Confidence intervals: P(thteta e (theta L barat, theta V barat)) = 1 - alpha
+
+ 1-alpha = confidence level
+alhpa = significance level
+
+ex: P(theta e (4,6))= 95%
+=> significance level = 0.05 = 5%
+95% sure that if we take another sample the duration of the battery will be between 4 and 6 hours in 95% of the times
+
+
+
+H0 = null hypothesis
+H0: theta = theta0
+
+H1 = alternative hypothesis
+H1: theta < theta0 (left tailed test)  -1
+    theta  > theta0 (right tailed test) 1
+    theta = theta0 (bilateral test)     0
+
+
+Notations:
+alpha e (0,1) significance level
+TS = a statistical test
+TS0 = TS(theta = theta0) = the observed value
+RR = rejection region
+P-value (if alpha < P then we won't reject H0)
+
+if TS0 (observed value) e RR then we reject H0, 
+if it's not we won't reject H0
+
+
+
+ex1:
+theta = the average number of files => theta = miu
+H0: miu = 8.5 
+H1: miu < 8.5  (the standard is not met anymore) => left tailed test
+
+we work with an average so we go with the 1 from Confidence Intervals file
+
+
+we use the ztest command:
+[H, P, Ci, ZVAL] = ztest(X, M, SIGMA, ALPHA, TAIL)
+X = the vector
+M = the test value (8.5)
+SIGMA = standar deviation (5)
+ALPHA = significance value (5% => 0.05)
+TAIL = left tailed = -1
+
+H = boolean, 0 if we don't reject H0
+             1 if we reject H0
+Ci = confidence interval
+ZVAL = TS0
+
+rejection region = tt i- alpha, +inf  (b: theta > theta0)
+
+
+---------------------------------------------------------------
+%a
+clear all;
+clc;
+
+X = [7, 7, 4, 5, 9, 9,...
+     4, 12, 8, 1, 8, 7,...
+     3, 13, 2, 1, 17, 1,...
+     12, 5, 6, 2, 1, 13,...
+     14, 10, 2, 4, 9, 11,...
+     3, 5, 12, 6, 10, 7];
+n = numel(X);  % the nr of elems in X
+sigma = 5;
+alpha = input("Enter the significance level: ");  % significance level
+m = 8.5;
+
+% theta = mu
+% H0: mu = 8.5
+% H1: mu < 8.5 (left-tailed test)
+[H, P, CI, ZVAL] = ztest(X, m, sigma, alpha, -1);
+RR = [-inf, norminv(alpha)];
+
+fprintf("Significance level: alpha = %f\nLeft tailed test for the mean (sigma = standard deviation known)\n\n", alpha);
+fprintf("Test value is m = %f\n", m);
+if (H == 1)
+    fprintf("h is *1*, so the null hypothesis is rejected, so the efficiency standard is *not* met :(.\n");
+end
+if (H == 0)
+    fprintf("h is *0*, so the null hypothesis is approved, so the efficiency standard is met :).\n")
+end
+fprintf("The rejection region is (%f, %f)\nThe value of the test statistic (zvalue) is %f\nThe P-value of the test is %f\n",...
+         RR(1), RR(2), ZVAL, P);
+
+
+------------------------------------------------------------------
+
+ex 1 b
+
+H0: miu = 5.5
+H1: miu > 5.5 => right tailed test
+
+we don't know sigma so we use 1.second from test.pdf => ttest
+
+[H, P, Ci, STATS] = ttest(X, M, ALPHA, TAIL) 
+M= 5.5
+Tail = 1
+
+STATS = structure with three parts
+STATS.tstat = observed value, TS0
+     .df = degrees of freedom = n-1
+     .sd = approximation of the standard deviation
+
+
+--------------------------------------------------------------
+%b
+%b
+clear all;
+clc;
+
+X = [7, 7, 4, 5, 9, 9,...
+     4, 12, 8, 1, 8, 7,...
+     3, 13, 2, 1, 17, 1,...
+     12, 5, 6, 2, 1, 13,...
+     14, 10, 2, 4, 9, 11,...
+     3, 5, 12, 6, 10, 7];
+n = numel(X);  % the nr of elems in X
+sigma = 5;
+alpha = input("Enter the significance level: ");  % significance level
+m = 5.5;
+
+
+[H, P, CI, stats] = ttest(X, m, alpha, 1);
+RR = [ tinv(alpha, n-1), inf];
+
+fprintf("Significance level: alpha = %f\nLeft tailed test for the mean (sigma = standard deviation known)\n\n", alpha);
+fprintf("Test value is m = %f\n", m);
+if (H == 1)
+    fprintf("h is *1*, so the null hypothesis is rejected, so the efficiency standard is *not* met :(.\n");
+end
+if (H == 0)
+    fprintf("h is *0*, so the null hypothesis is approved, so the efficiency standard is met :).\n")
+end
+fprintf("The rejection region is (%f, %f)\nThe value of the test statistic (zvalue) is %f\nThe P-value of the test is %f\n",...
+         RR(1), RR(2), stats.tstat, P);
+-----------------------------------------------------------------
+
+
+ex2   a
+
+theta = sigma1 ^ 2 / sigma2 ^ 2
+H0: theta = 1
+H1: theta != 1 (two sided test)
+ 
+=> we use the fisher model
+
+[H, P, Ci, STATS] = vartest2 ( X, Y, ALPHA, TAIL)
+alpha = 0.05
+tail = 0
+stats.df1
+     .df2
+     .fstat = TS0
+
+-----------------------------------------------------------------
+ 
+
+
+Confidence intervals:
+
+of the form 100(1-alpha)% where alpha is significance level
+
+alegem de pe foiaa de formule in ce caz suntem
+
+iar pt a calcula quantiles:
+
+ ************N(0,1) distribution 
+we use: norminv(probability, mean, standardDeviation)
+simplified as: z = norminv(probability); because mean is 0 and standard deviation is 1
+
+alpha = 0.05; % Example significance level
+% and now compute the quantiles referring to the N(0,1) distribution
+n1 = norminv(1-alpha/2, 0, 1);
+n2 = norminv(alpha/2, 0, 1);
+
+
+confidence limits:
+limit1 = xbar - sigma/sqrt(n)*t1;
+limit2 = xbar - sigma/sqrt(n)*t2;  where xbar = mean(X)
+
+
+
+
+
+**************T(n-1) distribution                            n=length(x)
+we use: tinv(probability, degreesOfFreedom)
+
+% and now compute the quantiles referring to the T(n-1) distribution
+t1 = tinv(1-alpha/2, n-1);
+t2 = tinv(alpha/2, n-1);
+
+
+*************χ2(n−1) distribution (chi square distribution)
+we use: chi2inv(probability, degreesOfFreedom);
+
+alpha = 0.05; % Example significance level
+df = 10;      % Example degrees of freedom
+chi2_1 = chi2inv(1 - alpha/2, df); % Upper quantile
+chi2_2 = chi2inv(alpha/2, df);     % Lower quantile
+
+for us:
+% and now compute the quantiles referring to the Chi-Square(n-1) distribution
+chi2_1 = chi2inv(1-alpha/2, n-1);
+chi2_2 = chi2inv(alpha/2, n-1);
+
+
+
+**********T(n1+n2-2) distribution
+we use tinv(probability, degreesOfFreedom)
+% and now compute the quantiles referring to the T(n1+n2-2) distribution
+t1 = tinv(1-alpha/2, n1 + n2 - 2);
+t2 = tinv(alpha/2, n1 + n2 - 2);
+
+
+
+*********T(n) distribution
+df = min(n_standard, n_new) - 1;  (degrees of freedom)
+% and now compute the quantiles referring to the T(n-1) distribution
+t1 = tinv(1-alpha/2, n-1);
+t2 = tinv(alpha/2, n-1);
+
+alpha = 0.05; % Example significance level        %%%varianta mai buna
+df = n; % Example degrees of freedom
+t_1 = tinv(1 - alpha/2, df); % Upper quantile
+t_2 = tinv(alpha/2, df);     % Lower quantile
+
+
+
+
+*********F(n1-1, n2-1) distribution
+we use  finv(probability, df1, df2);
+
+q1 = finv(alpha/2, stats.df1, stats.df2);
+q2 = finv(1-alpha/2, stats.df2, stats.df1);
+
+[h, p, ci] = vartest2(X1, X2, alpha, tail);
+[h, p, ci] = ttest2(X1, X2, alpha, 1, 'unequal');
+
+
+
+
+After computing the quantiles, the limits for the confidence interval are:
+limit1 = xbar - sigma/sqrt(n)*t1;
+limit2 = xbar - sigma/sqrt(n)*t2;
+
+sigma = std(X);   (if it is unknown)
+
+
+
+vartest: equality of variances or standard deviations between two independent samples. (pop variances seem to differ?)
+vartest2(x1,x2,alpha,tail)
+
+ttest: equality of means between two independent samples. (on average keyword)
+
+TESTS:
+%[h,p,ci,stats]=vartest2(x,y,alpha, tail)
+
+%%[h,p,ci,stats]=ttest2(x,y,alpha, tail, vartype)
+%in vartype we put "equal" or "unequal" depending on what we obtained at a)
+
+%[h,p,ci,zval] = ztest(x,mean,sigma, alpha, tail);
+
+the quantiles:
+q1 = finv(alpha/2, stats.df1, stats.df2);
+q2 = finv(1-alpha/2, stats.df2, stats.df1);
+
+q1 = tinv(1-alpha, stats.df);
+
+
+
